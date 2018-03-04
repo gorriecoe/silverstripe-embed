@@ -1,0 +1,13 @@
+en:
+  gorriecoe\Embed\Models\Embed:
+    PLURALNAME: Embed
+    PLURALS:
+      one: 'An Embed'
+      other: '{count} Embed'
+    SINGULARNAME: Embed
+  gorriecoe\Embed\Models\Video:
+    PLURALNAME: Video
+    PLURALS:
+      one: 'A Video'
+      other: '{count} Video'
+    SINGULARNAME: Video
