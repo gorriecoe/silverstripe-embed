@@ -14,6 +14,12 @@ use gorriecoe\Embed\Extensions\Embeddable;
 class Embed extends DataObject
 {
     /**
+     * Defines the database table name
+     * @var string
+     */
+    private static $table_name = 'Embed';
+
+    /**
      * Singular name for CMS
      * @var string
      */

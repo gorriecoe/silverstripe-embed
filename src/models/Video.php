@@ -10,6 +10,12 @@ use gorriecoe\Embed\Models\Embed;
 class Video extends Embed
 {
     /**
+     * Defines the database table name
+     * @var string
+     */
+    private static $table_name = 'Video';
+
+    /**
      * Singular name for CMS
      * @var string
      */
