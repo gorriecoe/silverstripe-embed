@@ -37,6 +37,7 @@ class Embeddable extends DataExtension
         'EmbedHTML' => 'HTMLText',
         'EmbedWidth' => 'Varchar',
         'EmbedHeight' => 'Varchar',
+        'EmbedAspectRatio' => 'Varchar',
         'EmbedDescription' => 'HTMLText'
     );
 
@@ -91,6 +92,7 @@ class Embeddable extends DataExtension
             'EmbedHTML',
             'EmbedWidth',
             'EmbedHeight',
+            'EmbedAspectRatio',
             'EmbedDescription',
             'EmbedImage'
         ));
@@ -155,6 +157,7 @@ class Embeddable extends DataExtension
                 $owner->EmbedType = $embed->getType();
                 $owner->EmbedWidth = $embed->getWidth();
                 $owner->EmbedHeight = $embed->getHeight();
+                $owner->EmbedAspectRatio = $embed->getAspectRatio();
                 if ($owner->EmbedSourceImageURL != $embed->getImage()) {
                     $owner->EmbedSourceImageURL = $embed->getImage();
                     $fileExplode = explode('.', $embed->getImage());
