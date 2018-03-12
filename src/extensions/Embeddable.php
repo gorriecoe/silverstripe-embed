@@ -102,23 +102,27 @@ class Embeddable extends DataExtension
             array(
                 TextField::create(
                     'EmbedTitle',
-                    'Title'
+                    _t(__CLASS__ . '.TITLE.LABEL', 'Title')
                 )
-                ->setDescription('Optional. Will be auto-generated if left blank'),
+                ->setDescription(
+                    _t(__CLASS__ . '.TITLE.DESCRIPTION', 'Optional. Will be auto-generated if left blank')
+                ),
                 TextField::create(
                     'EmbedSourceURL',
-                    'Source URL'
+                    _t(__CLASS__ . '.SOURCEURL.LABEL', 'Source URL')
                 )
-                ->setDescription('Specify a external URL'),
+                ->setDescription(
+                    _t(__CLASS__ . '.SOURCEURL.DESCRIPTION', 'Specify a external URL')
+                ),
                 UploadField::create(
                     'EmbedImage',
-                    Image::class
+                    _t(__CLASS__ . '.IMAGE.LABEL', 'Image')
                 )
                 ->setFolderName($owner->EmbedFolder)
                 ->setAllowedExtensions(array('jpg','png','gif')),
                 TextareaField::create(
                     'EmbedDescription',
-                    'Description'
+                    _t(__CLASS__ . '.DESCRIPTION.LABEL', 'Description')
                 )
             )
         );
@@ -128,7 +132,7 @@ class Embeddable extends DataExtension
                 'Root.' . $tab,
                 ReadonlyField::create(
                     'EmbedType',
-                    'Type'
+                    _t(__CLASS__ . '.TYPE.LABEL', 'Type')
                 ),
                 'EmbedImage'
             );
@@ -207,7 +211,9 @@ class Embeddable extends DataExtension
             if (!in_array($embed->getType(), $allowed_types)) {
                 $string = implode(', ', $allowed_types);
                 $string = (substr($string, -1) == ',') ? substr_replace($string, ' or', -1) : $string;
-                $validationResult->error("The embed content is not a $string");
+                $validationResult->error(
+                    _t(__CLASS__ . '.ERROR.NOTSTRING', "The embed content is not a $string")
+                );
             }
         }
 
