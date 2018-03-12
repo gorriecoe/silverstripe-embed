@@ -16,7 +16,7 @@ composer require gorriecoe/silverstripe-embed
 - [Gorrie Coe](https://github.com/gorriecoe)
 
 ## Usage
-Dataobjects
+Relationship to Embed Dataobjects
 ```php
 use gorriecoe\Embed\Models\Embed;
 
@@ -50,7 +50,7 @@ class ClassName extends DataObject
 }
 
 ```
-DataExtension
+Update current DataObject to be Embeddable with DataExtension
 ```php
 use gorriecoe\Embed\Extensions\Embeddable;
 
