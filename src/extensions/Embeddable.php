@@ -197,11 +197,18 @@ class Embeddable extends DataExtension
         }
     }
 
+    /**
+     * @return array()
+     */
     public function getAllowedEmbedTypes()
     {
         return $owner->config()->get('allowed_embed_types');
     }
 
+    /**
+     * @param  ValidationResult $validationResult
+     * @return ValidationResult
+     */
     public function validate(ValidationResult $validationResult)
     {
         $owner = $this->owner;
@@ -220,6 +227,9 @@ class Embeddable extends DataExtension
         return $validationResult;
     }
 
+    /**
+     * @return string
+     */
     public function getEmbedFolder()
     {
         $owner = $this->owner;
