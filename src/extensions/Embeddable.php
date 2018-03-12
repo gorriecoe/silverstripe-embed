@@ -15,6 +15,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\View\SSViewer;
 use SilverStripe\ORM\DataExtension;
+use Embed\Embed;
 
 /**
  * Embeddable
@@ -142,7 +143,7 @@ class Embeddable extends DataExtension
         $owner = $this->owner;
         $changes = $owner->getChangedFields();
         if ($sourceURL = $owner->EmbedSourceURL) {
-            $embed = Embed\Embed::create($sourceURL);
+            $embed = Embed::create($sourceURL);
             if ($owner->EmbedTitle == '') {
                 $owner->EmbedTitle = $embed->getTitle();
             }
@@ -199,7 +200,7 @@ class Embeddable extends DataExtension
         $owner = $this->owner;
         $allowed_types = $this->AllowedEmbedTypes;
         if ($sourceURL = $owner->SourceURL && isset($allowed_types)) {
-            $embed = Embed\Embed::create($sourceURL);
+            $embed = Embed::create($sourceURL);
             if (!in_array($embed->getType(), $allowed_types)) {
                 $string = implode(', ', $allowed_types);
                 $string = (substr($string, -1) == ',') ? substr_replace($string, ' or', -1) : $string;
