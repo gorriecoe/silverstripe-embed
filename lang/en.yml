@@ -1,4 +1,12 @@
 en:
+  gorriecoe\Embed\Extensions\Embeddable:
+    DESCRIPTIONLABEL: Description
+    IMAGELABEL: Image
+    SOURCEURLDESCRIPTION: 'Specify a external URL'
+    SOURCEURLLABEL: 'Source URL'
+    TITLEDESCRIPTION: 'Optional. Will be auto-generated if left blank'
+    TITLELABEL: Title
+    TYPELABEL: Type
   gorriecoe\Embed\Models\Embed:
     PLURALNAME: Embed
     PLURALS:

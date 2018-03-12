@@ -102,27 +102,27 @@ class Embeddable extends DataExtension
             array(
                 TextField::create(
                     'EmbedTitle',
-                    _t(__CLASS__ . '.TITLE.LABEL', 'Title')
+                    _t(__CLASS__ . '.TITLELABEL', 'Title')
                 )
                 ->setDescription(
-                    _t(__CLASS__ . '.TITLE.DESCRIPTION', 'Optional. Will be auto-generated if left blank')
+                    _t(__CLASS__ . '.TITLEDESCRIPTION', 'Optional. Will be auto-generated if left blank')
                 ),
                 TextField::create(
                     'EmbedSourceURL',
-                    _t(__CLASS__ . '.SOURCEURL.LABEL', 'Source URL')
+                    _t(__CLASS__ . '.SOURCEURLLABEL', 'Source URL')
                 )
                 ->setDescription(
-                    _t(__CLASS__ . '.SOURCEURL.DESCRIPTION', 'Specify a external URL')
+                    _t(__CLASS__ . '.SOURCEURLDESCRIPTION', 'Specify a external URL')
                 ),
                 UploadField::create(
                     'EmbedImage',
-                    _t(__CLASS__ . '.IMAGE.LABEL', 'Image')
+                    _t(__CLASS__ . '.IMAGELABEL', 'Image')
                 )
                 ->setFolderName($owner->EmbedFolder)
                 ->setAllowedExtensions(array('jpg','png','gif')),
                 TextareaField::create(
                     'EmbedDescription',
-                    _t(__CLASS__ . '.DESCRIPTION.LABEL', 'Description')
+                    _t(__CLASS__ . '.DESCRIPTIONLABEL', 'Description')
                 )
             )
         );
@@ -132,7 +132,7 @@ class Embeddable extends DataExtension
                 'Root.' . $tab,
                 ReadonlyField::create(
                     'EmbedType',
-                    _t(__CLASS__ . '.TYPE.LABEL', 'Type')
+                    _t(__CLASS__ . '.TYPELABEL', 'Type')
                 ),
                 'EmbedImage'
             );
@@ -219,7 +219,7 @@ class Embeddable extends DataExtension
                 $string = implode(', ', $allowed_types);
                 $string = (substr($string, -1) == ',') ? substr_replace($string, ' or', -1) : $string;
                 $validationResult->error(
-                    _t(__CLASS__ . '.ERROR.NOTSTRING', "The embed content is not a $string")
+                    _t(__CLASS__ . '.ERRORNOTSTRING', "The embed content is not a $string")
                 );
             }
         }
