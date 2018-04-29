@@ -319,14 +319,19 @@ class Embeddable extends DataExtension
         switch ($type) {
             case 'video':
             case 'rich':
-                return "<div class='$class'>$embedHTML</div>";
+                $html = HTMLTag::create($embedHTML, 'div');
                 break;
             case 'link':
-                return "<a class='$class' href='$sourceURL'>$title</a>";
+                $html = HTMLTag::create($title, 'a')->setAttribute('href', $sourceURL);
                 break;
             case 'photo':
-                return "<img src='$sourceURL' width='$this->Width' height='$this->Height' class='$class' alt='$title' />";
+                $html = HTMLTag::create($sourceURL, 'img')->setAttribute([
+                    'width' => $this->Width,
+                    'height' => $this->Height,
+                    'alt' => $title
+                ]);
                 break;
         }
+        return $html->setClass($class);
     }
 }
