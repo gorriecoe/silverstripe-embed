@@ -3,19 +3,22 @@
 namespace gorriecoe\Embed\Extensions;
 
 use SilverStripe\Assets\Image;
+use SilverStripe\Assets\Folder;
+use SilverStripe\Assets\File;
+use SilverStripe\Assets\Storage\AssetStore;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
-use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Core\Convert;
-use SilverStripe\Assets\Folder;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Security\Member;
 use SilverStripe\ORM\ValidationResult;
-use SilverStripe\View\SSViewer;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\View\SSViewer;
+use SilverStripe\Security\Member;
 use Embed\Embed;
+use gorriecoe\HTMLTag\View\HTMLTag;
 
 /**
  * Embeddable
@@ -29,7 +32,7 @@ class Embeddable extends DataExtension
      * Database fields
      * @var array
      */
-    private static $db = array(
+    private static $db = [
         'EmbedTitle' => 'Varchar(255)',
         'EmbedType' => 'Varchar',
         'EmbedSourceURL' => 'Varchar(255)',
@@ -39,15 +42,23 @@ class Embeddable extends DataExtension
         'EmbedHeight' => 'Varchar',
         'EmbedAspectRatio' => 'Varchar',
         'EmbedDescription' => 'HTMLText'
-    );
+    ];
 
     /**
      * Has_one relationship
      * @var array
      */
-    private static $has_one = array(
+    private static $has_one = [
         'EmbedImage' => Image::class
-    );
+    ];
+
+    /**
+     * Relationship version ownership
+     * @var array
+     */
+    private static $owns = [
+        'EmbedImage'
+    ];
 
     /**
      * List the allowed included embed types.  If null all are allowed.
@@ -65,7 +76,7 @@ class Embeddable extends DataExtension
      * List of custom CSS classes for template.
      * @var array
      */
-    protected $classes = array();
+    protected $classes = [];
 
     /**
      * Defines the template to render the embed in.
@@ -84,7 +95,7 @@ class Embeddable extends DataExtension
         $tab = isset($tab) ? $tab : 'Main';
 
         // Ensure these fields don't get added by fields scaffold
-        $fields->removeByName(array(
+        $fields->removeByName([
             'EmbedTitle',
             'EmbedType',
             'EmbedSourceURL',
@@ -95,7 +106,7 @@ class Embeddable extends DataExtension
             'EmbedAspectRatio',
             'EmbedDescription',
             'EmbedImage'
-        ));
+        ]);
 
         $fields->addFieldsToTab(
             'Root.' . $tab,
@@ -119,7 +130,7 @@ class Embeddable extends DataExtension
                     _t(__CLASS__ . '.IMAGELABEL', 'Image')
                 )
                 ->setFolderName($owner->EmbedFolder)
-                ->setAllowedExtensions(array('jpg','png','gif')),
+                ->setAllowedExtensions(['jpg','png','gif']),
                 TextareaField::create(
                     'EmbedDescription',
                     _t(__CLASS__ . '.DESCRIPTIONLABEL', 'Description')
@@ -127,7 +138,7 @@ class Embeddable extends DataExtension
             )
         );
 
-        if (Count($this->AllowedEmbedTypes) > 1) {
+        if (Count($owner->AllowedEmbedTypes) > 1) {
             $fields->addFieldToTab(
                 'Root.' . $tab,
                 ReadonlyField::create(
@@ -147,43 +158,48 @@ class Embeddable extends DataExtension
     public function onBeforeWrite()
     {
         $owner = $this->owner;
-        $changes = $owner->getChangedFields();
         if ($sourceURL = $owner->EmbedSourceURL) {
             $embed = Embed::create($sourceURL);
             if ($owner->EmbedTitle == '') {
-                $owner->EmbedTitle = $embed->getTitle();
+                $owner->EmbedTitle = $embed->Title;
             }
             if (!$owner->EmbedDescription == '') {
-                $owner->EmbedDescription = $embed->getDescription();
+                $owner->EmbedDescription = $embed->Description;
             }
+            $changes = $owner->getChangedFields();
             if (isset($changes['EmbedSourceURL']) && !$owner->EmbedImageID) {
-                $owner->EmbedHTML = $embed->getCode();
-                $owner->EmbedType = $embed->getType();
-                $owner->EmbedWidth = $embed->getWidth();
-                $owner->EmbedHeight = $embed->getHeight();
-                $owner->EmbedAspectRatio = $embed->getAspectRatio();
-                if ($owner->EmbedSourceImageURL != $embed->getImage()) {
-                    $owner->EmbedSourceImageURL = $embed->getImage();
-                    $fileExplode = explode('.', $embed->getImage());
+                $owner->EmbedHTML = $embed->Code;
+                $owner->EmbedType = $embed->Type;
+                $owner->EmbedWidth = $embed->Width;
+                $owner->EmbedHeight = $embed->Height;
+                $owner->EmbedAspectRatio = $embed->AspectRatio;
+                if ($owner->EmbedSourceImageURL != $embed->Image) {
+                    $owner->EmbedSourceImageURL = $embed->Image;
+                    $fileExplode = explode('.', $embed->Image);
                     $fileExtension = end($fileExplode);
                     $fileName = Convert::raw2url($owner->obj('EmbedTitle')->LimitCharacters(55)) . '.' . $fileExtension;
                     $parentFolder = Folder::find_or_make($owner->EmbedFolder);
 
-                    // Save image to server
-                    $tmpFileContent = file_get_contents($embed->getImage());
-                    file_put_contents($parentFolder->FullPath . '/' . $fileName, $tmpFileContent);
-
-                    // Check existing for image object or create new
                     $imageObject = DataObject::get_one(
                         Image::class,
-                        array(
+                        [
                             'Name' => $fileName,
                             'ParentID' => $parentFolder->ID
-                        )
+                        ]
                     );
                     if(!$imageObject){
+                        // Save image to server
                         $imageObject = Image::create();
+                        $imageObject->setFromString(
+                            file_get_contents($embed->Image),
+                            $owner->EmbedFolder . '/' . $fileName,
+                            null,
+                            null,
+                            AssetStore::CONFLICT_OVERWRITE
+                        );
                     }
+
+                    // Check existing for image object or create new
                     $imageObject->ParentID = $parentFolder->ID;
                     $imageObject->Name = $fileName;
                     $imageObject->Title = $embed->getTitle();
@@ -202,7 +218,7 @@ class Embeddable extends DataExtension
      */
     public function getAllowedEmbedTypes()
     {
-        return $owner->config()->get('allowed_embed_types');
+        return $this->owner->config()->get('allowed_embed_types');
     }
 
     /**
@@ -212,7 +228,7 @@ class Embeddable extends DataExtension
     public function validate(ValidationResult $validationResult)
     {
         $owner = $this->owner;
-        $allowed_types = $this->AllowedEmbedTypes;
+        $allowed_types = $owner->AllowedEmbedTypes;
         if ($sourceURL = $owner->SourceURL && isset($allowed_types)) {
             $embed = Embed::create($sourceURL);
             if (!in_array($embed->getType(), $allowed_types)) {
@@ -292,7 +308,7 @@ class Embeddable extends DataExtension
         $template = $this->template;
         $embedHTML = $owner->EmbedHTML;
         $sourceURL = $owner->EmbedSourceURL;
-        $templates = array();
+        $templates = [];
         if ($type) {
             $templates[] = $template . '_' . $type;
         }
