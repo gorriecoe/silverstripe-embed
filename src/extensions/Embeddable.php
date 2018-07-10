@@ -61,12 +61,6 @@ class Embeddable extends DataExtension
     ];
 
     /**
-     * List the allowed included embed types.  If null all are allowed.
-     * @var array
-     */
-    private static $allowed_embed_types = null;
-
-    /**
      * Defines tab to insert the embed fields into.
      * @var string
      */
@@ -138,7 +132,7 @@ class Embeddable extends DataExtension
             )
         );
 
-        if (Count($owner->AllowedEmbedTypes) > 1) {
+        if (isset($owner->AllowedEmbedTypes) && Count($owner->AllowedEmbedTypes) > 1) {
             $fields->addFieldToTab(
                 'Root.' . $tab,
                 ReadonlyField::create(
@@ -214,7 +208,7 @@ class Embeddable extends DataExtension
     }
 
     /**
-     * @return array()
+     * @return array()|null
      */
     public function getAllowedEmbedTypes()
     {
@@ -229,17 +223,17 @@ class Embeddable extends DataExtension
     {
         $owner = $this->owner;
         $allowed_types = $owner->AllowedEmbedTypes;
-        if ($sourceURL = $owner->SourceURL && isset($allowed_types)) {
+        $sourceURL = $owner->EmbedSourceURL;
+        if ($sourceURL && isset($allowed_types)) {
             $embed = Embed::create($sourceURL);
-            if (!in_array($embed->getType(), $allowed_types)) {
+            if (!in_array($embed->Type, $allowed_types)) {
                 $string = implode(', ', $allowed_types);
                 $string = (substr($string, -1) == ',') ? substr_replace($string, ' or', -1) : $string;
-                $validationResult->error(
+                $validationResult->addError(
                     _t(__CLASS__ . '.ERRORNOTSTRING', "The embed content is not a $string")
                 );
             }
         }
-
         return $validationResult;
     }
 
