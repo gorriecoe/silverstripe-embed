@@ -1,6 +1,6 @@
 {
   "name": "gorriecoe/silverstripe-embed",
-  "description": "",
+  "description": "Adds embed and video a dataobject along with dataextension to apply embed to existing objects.",
   "type": "silverstripe-vendormodule",
   "license": "BSD-3-Clause",
   "authors": [

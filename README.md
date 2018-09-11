@@ -1,5 +1,5 @@
 # Silverstripe embed
-Adds embed and video a dataobject and dataextension.
+Adds embed and video a dataobject along with dataextension to apply embed to existing objects.
 
 ## Installation
 Composer is the recommended way of installing SilverStripe modules.
