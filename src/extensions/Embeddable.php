@@ -189,7 +189,9 @@ class Embeddable extends DataExtension
                             $owner->EmbedFolder . '/' . $fileName,
                             null,
                             null,
-                            AssetStore::CONFLICT_OVERWRITE
+                            [
+                                'conflict' => AssetStore::CONFLICT_OVERWRITE
+                            ]
                         );
                     }
 
