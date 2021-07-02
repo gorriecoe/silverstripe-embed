@@ -157,7 +157,7 @@ class Embeddable extends DataExtension
             if ($owner->EmbedTitle == '') {
                 $owner->EmbedTitle = $embed->Title;
             }
-            if (!$owner->EmbedDescription == '') {
+            if ($owner->EmbedDescription == '') {
                 $owner->EmbedDescription = $embed->Description;
             }
             $changes = $owner->getChangedFields();
