@@ -132,7 +132,7 @@ class Embeddable extends DataExtension
             )
         );
 
-        if (isset($owner->AllowedEmbedTypes) && Count($owner->AllowedEmbedTypes) > 1) {
+        if (isset($owner->AllowedEmbedTypes) && is_array($owner->AllowedEmbedTypes) && Count($owner->AllowedEmbedTypes) > 1) {
             $fields->addFieldToTab(
                 'Root.' . $tab,
                 ReadonlyField::create(
