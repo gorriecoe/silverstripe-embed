@@ -153,7 +153,10 @@ class Embeddable extends DataExtension
     {
         $owner = $this->owner;
         if ($sourceURL = $owner->EmbedSourceURL) {
-            $embed = Embed::create($sourceURL);
+            $config = [
+                'choose_bigger_image' => true,
+            ];
+            $embed = Embed::create($sourceURL, $config);
             if ($owner->EmbedTitle == '') {
                 $owner->EmbedTitle = $embed->Title;
             }
