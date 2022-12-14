@@ -125,7 +125,7 @@ class Embeddable extends DataExtension
                     _t(__CLASS__ . '.IMAGELABEL', 'Image')
                 )
                 ->setFolderName($owner->EmbedFolder)
-                ->setAllowedExtensions(['jpg','png','gif']),
+                ->setAllowedFileCategories(['image']),
                 TextareaField::create(
                     'EmbedDescription',
                     _t(__CLASS__ . '.DESCRIPTIONLABEL', 'Description')
