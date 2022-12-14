@@ -164,7 +164,7 @@ class Embeddable extends DataExtension
                 $owner->EmbedDescription = $embed->Description;
             }
             $changes = $owner->getChangedFields();
-            if (isset($changes['EmbedSourceURL']) && !$owner->EmbedImageID) {
+            if (isset($changes['EmbedSourceURL'])) {
                 $owner->EmbedHTML = $embed->code->html;
                 $owner->EmbedType = 'video';
                 $owner->EmbedWidth = $embed->code->width;
