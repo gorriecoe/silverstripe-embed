@@ -170,7 +170,9 @@ class Embeddable extends DataExtension
                 if ($owner->EmbedSourceImageURL != $embed->Image) {
                     $owner->EmbedSourceImageURL = $embed->Image;
                     $fileExplode = explode('.', $embed->Image);
-                    $fileExtension = end($fileExplode);
+                    $fileExtensionExplode = explode('?', end($fileExplode));
+                    $fileExtension = $fileExtensionExplode[0];
+                    $fileExtensionQuery = $fileExtensionExplode[0];
                     $fileName = Convert::raw2url($owner->obj('EmbedTitle')->LimitCharacters(55)) . '.' . $fileExtension;
                     $parentFolder = Folder::find_or_make($owner->EmbedFolder);
 
