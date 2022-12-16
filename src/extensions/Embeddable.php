@@ -172,7 +172,7 @@ class Embeddable extends DataExtension
                     $fileExplode = explode('.', $embed->Image);
                     $fileExtensionExplode = explode('?', end($fileExplode));
                     $fileExtension = $fileExtensionExplode[0];
-                    $fileExtensionQuery = $fileExtensionExplode[0];
+                    $fileExtensionQuery = $fileExtensionExplode[1];
                     $fileName = Convert::raw2url($owner->obj('EmbedTitle')->LimitCharacters(55)) . '.' . $fileExtension;
                     $parentFolder = Folder::find_or_make($owner->EmbedFolder);
 
