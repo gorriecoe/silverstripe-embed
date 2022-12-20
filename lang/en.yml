@@ -2,7 +2,7 @@ en:
   gorriecoe\Embed\Extensions\Embeddable:
     DESCRIPTIONLABEL: Description
     IMAGELABEL: Image
-    SOURCEURLDESCRIPTION: 'Specify a external URL'
+    SOURCEURLDESCRIPTION: 'Specify a external URL. Format for Youtube: https://www.youtube.com/watch?v=9bZkp7q19f0 Vimeo: https://player.vimeo.com/video/226053498'
     SOURCEURLLABEL: 'Source URL'
     TITLEDESCRIPTION: 'Optional. Will be auto-generated if left blank'
     TITLELABEL: Title

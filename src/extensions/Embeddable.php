@@ -2,23 +2,25 @@
 
 namespace gorriecoe\Embed\Extensions;
 
-use SilverStripe\Assets\Image;
-use SilverStripe\Assets\Folder;
-use SilverStripe\Assets\File;
-use SilverStripe\Assets\Storage\AssetStore;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TextField;
-use SilverStripe\Forms\TextareaField;
-use SilverStripe\Forms\ReadonlyField;
-use SilverStripe\AssetAdmin\Forms\UploadField;
-use SilverStripe\Core\Convert;
-use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\ValidationResult;
-use SilverStripe\ORM\DataExtension;
-use SilverStripe\View\SSViewer;
-use SilverStripe\Security\Member;
 use Embed\Embed;
 use gorriecoe\HTMLTag\View\HTMLTag;
+use SilverStripe\AssetAdmin\Forms\UploadField;
+use SilverStripe\Assets\File;
+use SilverStripe\Assets\Folder;
+use SilverStripe\Assets\Image;
+use SilverStripe\Assets\Storage\AssetStore;
+use SilverStripe\Core\Convert;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Forms\TextareaField;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\RequiredFields;
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\ValidationResult;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Security;
+use SilverStripe\View\SSViewer;
 
 /**
  * Embeddable
@@ -109,22 +111,23 @@ class Embeddable extends DataExtension
                     'EmbedTitle',
                     _t(__CLASS__ . '.TITLELABEL', 'Title')
                 )
-                ->setDescription(
-                    _t(__CLASS__ . '.TITLEDESCRIPTION', 'Optional. Will be auto-generated if left blank')
-                ),
+                    ->setDescription(
+                        _t(__CLASS__ . '.TITLEDESCRIPTION', 'Optional. Will be auto-generated if left blank')
+                    ),
                 TextField::create(
                     'EmbedSourceURL',
                     _t(__CLASS__ . '.SOURCEURLLABEL', 'Source URL')
                 )
-                ->setDescription(
-                    _t(__CLASS__ . '.SOURCEURLDESCRIPTION', 'Specify a external URL')
-                ),
+                    ->setDescription(
+                        _t(__CLASS__ . '.SOURCEURLDESCRIPTION', 'Specify a external URL. Format for Youtube: https://www.youtube.com/watch?v=9bZkp7q19f0 Vimeo: https://player.vimeo.com/video/226053498')
+                    ),
                 UploadField::create(
                     'EmbedImage',
                     _t(__CLASS__ . '.IMAGELABEL', 'Image')
                 )
-                ->setFolderName($owner->EmbedFolder)
-                ->setAllowedExtensions(['jpg','png','gif']),
+                    ->setFolderName($owner->EmbedFolder)
+                    ->setAllowedFileCategories(['image'])
+                    ->setDescription('Upload an image to use as a thumbnail for the embed.'),
                 TextareaField::create(
                     'EmbedDescription',
                     _t(__CLASS__ . '.DESCRIPTIONLABEL', 'Description')
@@ -146,6 +149,14 @@ class Embeddable extends DataExtension
         return $fields;
     }
 
+    public function getCMSValidator()
+    {
+        return RequiredFields::create(
+            'EmbedSourceURL',
+            'EmbedImage'
+        );
+    }
+
     /**
      * Event handler called before writing to the database.
      */
@@ -153,58 +164,63 @@ class Embeddable extends DataExtension
     {
         $owner = $this->owner;
         if ($sourceURL = $owner->EmbedSourceURL) {
-            $embed = Embed::create($sourceURL);
+            $embed = new Embed();
+            $embed = $embed->get($sourceURL);
+
             if ($owner->EmbedTitle == '') {
-                $owner->EmbedTitle = $embed->Title;
+                $owner->EmbedTitle = $embed->title;
             }
             if (!$owner->EmbedDescription == '') {
                 $owner->EmbedDescription = $embed->Description;
             }
             $changes = $owner->getChangedFields();
-            if (isset($changes['EmbedSourceURL']) && !$owner->EmbedImageID) {
-                $owner->EmbedHTML = $embed->Code;
-                $owner->EmbedType = $embed->Type;
-                $owner->EmbedWidth = $embed->Width;
-                $owner->EmbedHeight = $embed->Height;
-                $owner->EmbedAspectRatio = $embed->AspectRatio;
-                if ($owner->EmbedSourceImageURL != $embed->Image) {
-                    $owner->EmbedSourceImageURL = $embed->Image;
-                    $fileExplode = explode('.', $embed->Image);
-                    $fileExtension = end($fileExplode);
-                    $fileName = Convert::raw2url($owner->obj('EmbedTitle')->LimitCharacters(55)) . '.' . $fileExtension;
-                    $parentFolder = Folder::find_or_make($owner->EmbedFolder);
+            if (isset($changes['EmbedSourceURL'])) {
+                $owner->EmbedHTML = $embed->code->html;
+                $owner->EmbedType = 'video';
+                $owner->EmbedWidth = $embed->code->width;
+                $owner->EmbedHeight = $embed->code->height;
+                $owner->EmbedAspectRatio = $embed->code->ratio;
 
-                    $imageObject = DataObject::get_one(
-                        Image::class,
-                        [
-                            'Name' => $fileName,
-                            'ParentID' => $parentFolder->ID
-                        ]
-                    );
-                    if(!$imageObject){
-                        // Save image to server
-                        $imageObject = Image::create();
-                        $imageObject->setFromString(
-                            file_get_contents($embed->Image),
-                            $owner->EmbedFolder . '/' . $fileName,
-                            null,
-                            null,
-                            [
-                                'conflict' => AssetStore::CONFLICT_OVERWRITE
-                            ]
-                        );
-                    }
+                // TODO: This doesn't work. Images are too small and Vimeo returns images without a file extension
+                // if ($owner->EmbedSourceImageURL != (string) $embed->image) {
+                //     $owner->EmbedSourceImageURL = (string) $embed->image;
+                //     $fileExplode = explode('.', $embed->image);
+                //     $fileExtension = end($fileExplode);
+                //     $fileName = Convert::raw2url($owner->obj('EmbedTitle')->LimitCharacters(55)) . '.' . $fileExtension;
+                //     $parentFolder = Folder::find_or_make($owner->EmbedFolder);
 
-                    // Check existing for image object or create new
-                    $imageObject->ParentID = $parentFolder->ID;
-                    $imageObject->Name = $fileName;
-                    $imageObject->Title = $embed->getTitle();
-                    $imageObject->OwnerID = (Member::currentUserID() ? Member::currentUserID() : 0);
-                    $imageObject->ShowInSearch = false;
-                    $imageObject->write();
+                //     $imageObject = DataObject::get_one(
+                //         Image::class,
+                //         [
+                //             'Name' => $fileName,
+                //             'ParentID' => $parentFolder->ID
+                //         ]
+                //     );
 
-                    $owner->EmbedImageID = $imageObject->ID;
-                }
+                //     if(!$imageObject){
+                //         // Save image to server
+                //         $imageObject = Image::create();
+                //         $imageObject->setFromString(
+                //             file_get_contents($embed->Image),
+                //             $owner->EmbedFolder . '/' . $fileName,
+                //             null,
+                //             null,
+                //             [
+                //                 'conflict' => AssetStore::CONFLICT_OVERWRITE
+                //             ]
+                //         );
+                //     }
+
+                //     // Check existing for image object or create new
+                //     $imageObject->ParentID = $parentFolder->ID;
+                //     $imageObject->Name = $fileName;
+                //     $imageObject->Title = $embed->getTitle();
+                //     $imageObject->OwnerID = (Member::currentUserID() ? Member::currentUserID() : 0);
+                //     $imageObject->ShowInSearch = false;
+                //     $imageObject->write();
+
+                //     $owner->EmbedImageID = $imageObject->ID;
+                // }
             }
         }
     }
@@ -217,27 +233,29 @@ class Embeddable extends DataExtension
         return $this->owner->config()->get('allowed_embed_types');
     }
 
-    /**
-     * @param  ValidationResult $validationResult
-     * @return ValidationResult
-     */
-    public function validate(ValidationResult $validationResult)
-    {
-        $owner = $this->owner;
-        $allowed_types = $owner->AllowedEmbedTypes;
-        $sourceURL = $owner->EmbedSourceURL;
-        if ($sourceURL && isset($allowed_types)) {
-            $embed = Embed::create($sourceURL);
-            if (!in_array($embed->Type, $allowed_types)) {
-                $string = implode(', ', $allowed_types);
-                $string = (substr($string, -1) == ',') ? substr_replace($string, ' or', -1) : $string;
-                $validationResult->addError(
-                    _t(__CLASS__ . '.ERRORNOTSTRING', "The embed content is not a $string")
-                );
-            }
-        }
-        return $validationResult;
-    }
+    // TODO: This doesn't work with latest embed/embed
+    // /**
+    //  * @param  ValidationResult $validationResult
+    //  * @return ValidationResult
+    //  */
+    // public function validate(ValidationResult $validationResult)
+    // {
+    //     $owner = $this->owner;
+    //     $allowed_types = $owner->AllowedEmbedTypes;
+    //     $sourceURL = $owner->EmbedSourceURL;
+    //     if ($sourceURL && isset($allowed_types)) {
+    //         $embed = new Embed();
+    //         $embed = $embed->get($sourceURL);
+    //         if (!in_array($embed->Type, $allowed_types)) {
+    //             $string = implode(', ', $allowed_types);
+    //             $string = (substr($string, -1) == ',') ? substr_replace($string, ' or', -1) : $string;
+    //             $validationResult->addError(
+    //                 _t(__CLASS__ . '.ERRORNOTSTRING', "The embed content is not a $string")
+    //             );
+    //         }
+    //     }
+    //     return $validationResult;
+    // }
 
     /**
      * @return string
