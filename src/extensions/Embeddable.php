@@ -14,6 +14,7 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\RequiredFields;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ValidationResult;
@@ -110,22 +111,23 @@ class Embeddable extends DataExtension
                     'EmbedTitle',
                     _t(__CLASS__ . '.TITLELABEL', 'Title')
                 )
-                ->setDescription(
-                    _t(__CLASS__ . '.TITLEDESCRIPTION', 'Optional. Will be auto-generated if left blank')
-                ),
+                    ->setDescription(
+                        _t(__CLASS__ . '.TITLEDESCRIPTION', 'Optional. Will be auto-generated if left blank')
+                    ),
                 TextField::create(
                     'EmbedSourceURL',
                     _t(__CLASS__ . '.SOURCEURLLABEL', 'Source URL')
                 )
-                ->setDescription(
-                    _t(__CLASS__ . '.SOURCEURLDESCRIPTION', 'Specify a external URL')
-                ),
+                    ->setDescription(
+                        _t(__CLASS__ . '.SOURCEURLDESCRIPTION', 'Specify a external URL. Format for Youtube: https://www.youtube.com/watch?v=9bZkp7q19f0 Vimeo: https://player.vimeo.com/video/226053498')
+                    ),
                 UploadField::create(
                     'EmbedImage',
                     _t(__CLASS__ . '.IMAGELABEL', 'Image')
                 )
-                ->setFolderName($owner->EmbedFolder)
-                ->setAllowedFileCategories(['image']),
+                    ->setFolderName($owner->EmbedFolder)
+                    ->setAllowedFileCategories(['image'])
+                    ->setDescription('Upload an image to use as a thumbnail for the embed.'),
                 TextareaField::create(
                     'EmbedDescription',
                     _t(__CLASS__ . '.DESCRIPTIONLABEL', 'Description')
@@ -145,6 +147,14 @@ class Embeddable extends DataExtension
         }
 
         return $fields;
+    }
+
+    public function getCMSValidator()
+    {
+        return RequiredFields::create(
+            'EmbedSourceURL',
+            'EmbedImage'
+        );
     }
 
     /**
