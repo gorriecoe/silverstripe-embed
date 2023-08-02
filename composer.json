@@ -16,7 +16,7 @@
   ],
   "homepage": "http://github.com/dnadesign/silverstripe-embed",
   "require": {
-    "silverstripe/framework": "^4",
+    "silverstripe/framework": "^4 || ^5",
     "gorriecoe/silverstripe-htmltag": "^1.0"
   },
   "extra": {
