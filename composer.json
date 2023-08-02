@@ -17,8 +17,14 @@
   "homepage": "http://github.com/dnadesign/silverstripe-embed",
   "require": {
     "silverstripe/framework": "^4 || ^5",
-    "gorriecoe/silverstripe-htmltag": "^1.0"
+    "dnadesign/silverstripe-htmltag": "dev-master"
   },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://github.com/dnadesign/silverstripe-embed.git"
+    }
+  ],
   "extra": {
     "installer-name": "embed"
   }
