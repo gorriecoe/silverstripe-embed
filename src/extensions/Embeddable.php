@@ -170,8 +170,8 @@ class Embeddable extends DataExtension
             if ($owner->EmbedTitle == '') {
                 $owner->EmbedTitle = $embed->title;
             }
-            if (!$owner->EmbedDescription == '') {
-                $owner->EmbedDescription = $embed->Description;
+            if ($owner->EmbedDescription == '') {
+                $owner->EmbedDescription = $embed->description;
             }
             $changes = $owner->getChangedFields();
             if (isset($changes['EmbedSourceURL'])) {
