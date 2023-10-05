@@ -175,7 +175,7 @@ class Embeddable extends DataExtension
             }
             $changes = $owner->getChangedFields();
             if (isset($changes['EmbedSourceURL'])) {
-                $owner->EmbedHTML = $embed->code->html;
+                $owner->EmbedHTML = $this->addReferrerPolicyForVimeo($embed->code->html, $sourceURL);
                 $owner->EmbedType = 'video';
                 $owner->EmbedWidth = $embed->code->width;
                 $owner->EmbedHeight = $embed->code->height;
@@ -347,5 +347,22 @@ class Embeddable extends DataExtension
                 break;
         }
         return $html->setClass($class);
+    }
+
+    /**
+     * Vimeo videos may have domain-specific embed restrictions.
+     * This method ensures that only the origin (domain) of the referring document is
+     * sent as the referrer to Vimeo, potentially bypassing any restrictions set by
+     * video owners on Vimeo for specific domains.
+     *
+     * @param string $html The embed HTML.
+     * @param string $sourceURL The source URL of the embed.
+     * @return string Modified embed HTML.
+     */
+    protected function addReferrerPolicyForVimeo($html, $sourceURL) {
+        if (strpos($sourceURL, 'vimeo.com') !== false) {
+            return str_replace('<iframe ', '<iframe referrerpolicy="strict-origin" ', $html);
+        }
+        return $html;
     }
 }
